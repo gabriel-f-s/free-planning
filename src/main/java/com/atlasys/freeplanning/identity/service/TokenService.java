@@ -1,5 +1,6 @@
 package com.atlasys.freeplanning.identity.service;
 
+import com.atlasys.freeplanning.identity.exception.InvalidTokenException;
 import com.atlasys.freeplanning.identity.model.User;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -40,7 +41,7 @@ public class TokenService {
                     .verify(token)
                     .getSubject();
         } catch (JWTVerificationException exception) {
-            return "";
+            throw new InvalidTokenException("Invalid token, please do login again");
         }
     }
 

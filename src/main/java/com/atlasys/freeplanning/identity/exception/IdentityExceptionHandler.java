@@ -38,6 +38,21 @@ public class IdentityExceptionHandler {
         return ResponseEntity.status(status).body(new ErrorResponse(
                 status.value(),
                 status.name(),
+                "Invalid email or password provided",
+                request.getRequestURI(),
+                Instant.now()
+        ));
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ErrorResponse> invalidToken(
+            InvalidTokenException exception,
+            HttpServletRequest request
+    ) {
+        HttpStatus status = HttpStatus.UNAUTHORIZED;
+        return ResponseEntity.status(status).body(new ErrorResponse(
+                status.value(),
+                status.name(),
                 exception.getMessage(),
                 request.getRequestURI(),
                 Instant.now()
