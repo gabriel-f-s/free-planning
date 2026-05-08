@@ -39,7 +39,7 @@ public class AuthService {
 
         String token = tokenService.generateToken(user);
 
-        return new AuthenticationResponse(new UserResponse(user), token);
+        return new AuthenticationResponse(token, new UserResponse(user));
     }
 
     public AuthenticationResponse register(RegisterRequest request) {
@@ -57,6 +57,6 @@ public class AuthService {
 
         String token = tokenService.generateToken(newUser);
 
-        return new AuthenticationResponse(new UserResponse(newUser), token);
+        return new AuthenticationResponse(token, new UserResponse(newUser));
     }
 }
