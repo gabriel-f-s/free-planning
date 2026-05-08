@@ -1,14 +1,18 @@
 package com.atlasys.freeplanning.identity.model;
 
 import com.atlasys.freeplanning.identity.model.enums.Occupation;
+import com.atlasys.freeplanning.planning.dto.Note;
 import com.atlasys.freeplanning.planning.model.Project;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,6 +33,12 @@ public class User implements UserDetails {
     private String email;
 
     private String password;
+
+    private BigDecimal hourlyRate;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(columnDefinition = "jsonb")
+    private Note annotation;
 
     @Enumerated(EnumType.STRING)
     private Occupation occupation;
