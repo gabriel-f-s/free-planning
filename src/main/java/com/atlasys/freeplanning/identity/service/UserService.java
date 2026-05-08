@@ -1,5 +1,6 @@
 package com.atlasys.freeplanning.identity.service;
 
+import com.atlasys.freeplanning.identity.model.User;
 import com.atlasys.freeplanning.identity.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,4 +20,10 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return repository.findByEmail(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
+
+    public void update(User loggedUser) {}
+
+    public void changePassword(User loggedUser, String newPassword) {}
+
+    public void changeEmail(User loggedUser, String newEmail) {}
 }
