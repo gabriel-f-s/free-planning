@@ -58,4 +58,19 @@ public class IdentityExceptionHandler {
                 Instant.now()
         ));
     }
+
+    @ExceptionHandler(EntityChangeFailureException.class)
+    public ResponseEntity<ErrorResponse> entityChangeFailure(
+            EntityChangeFailureException exception,
+            HttpServletRequest request
+    ) {
+        HttpStatus status = HttpStatus.FORBIDDEN;
+        return ResponseEntity.status(status).body(new ErrorResponse(
+                status.value(),
+                status.name(),
+                exception.getMessage(),
+                request.getRequestURI(),
+                Instant.now()
+        ));
+    }
 }
