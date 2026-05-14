@@ -2,8 +2,10 @@ package com.atlasys.freeplanning.planning.model;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -11,6 +13,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Table(name = "kanban_columns", schema = "planning")
+@RequiredArgsConstructor
 public class KanbanColumn {
 
     @Id
@@ -26,9 +29,14 @@ public class KanbanColumn {
 
     @OneToMany(mappedBy = "column", cascade = CascadeType.ALL)
     @OrderBy("position ASC")
-    private List<KanbanTask> tasks;
+    private List<KanbanTask> tasks = new ArrayList<>();
 
     @Version
     private Long version;
 
+    public KanbanColumn(String name, int position, Project project) {
+        this.name = name;
+        this.position = position;
+        this.project = project;
+    }
 }

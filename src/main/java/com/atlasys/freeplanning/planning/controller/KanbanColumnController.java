@@ -3,6 +3,7 @@ package com.atlasys.freeplanning.planning.controller;
 import com.atlasys.freeplanning.identity.model.User;
 import com.atlasys.freeplanning.planning.dto.kanban.*;
 import com.atlasys.freeplanning.planning.service.KanbanColumnService;
+import com.atlasys.freeplanning.planning.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,22 +18,13 @@ public class KanbanColumnController {
 
     private final KanbanColumnService service;
 
-    @PostMapping("/{id}")
-    public ResponseEntity<KanbanColumnResponse> createColumn(
+    @PatchMapping("/{id}/rename")
+    public ResponseEntity<KanbanColumnResponse> renameColumn(
             @AuthenticationPrincipal User loggedUser,
             @PathVariable UUID id,
-            @RequestBody KanbanColumnRequest column
+            @RequestBody KanbanColumnRenameRequest name
     ) {
-        return ResponseEntity.ok(service.createColumn(loggedUser, id, column));
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<KanbanColumnResponse> updateColumn(
-            @AuthenticationPrincipal User loggedUser,
-            @PathVariable UUID id,
-            @RequestBody KanbanColumnRequest column
-    ) {
-        return ResponseEntity.ok(service.updateColumn(loggedUser, id, column));
+        return ResponseEntity.ok(service.renameColumn(loggedUser, id, name));
     }
 
     @DeleteMapping("/{id}")
@@ -42,5 +34,14 @@ public class KanbanColumnController {
     ) {
         service.deleteColumn(loggedUser, id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/tasks")
+    public ResponseEntity<KanbanTaskResponse> addTask(
+            @AuthenticationPrincipal User loggedUser,
+            @PathVariable UUID id,
+            @RequestBody KanbanTaskCreateRequest request
+    ) {
+        return ResponseEntity.ok(service.addTask(loggedUser, id, request));
     }
 }
