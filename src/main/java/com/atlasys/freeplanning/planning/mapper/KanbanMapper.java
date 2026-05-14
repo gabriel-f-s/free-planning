@@ -24,8 +24,8 @@ public interface KanbanMapper {
     KanbanTaskResponse toTaskResponse(KanbanTask task);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateEntityFromDto(KanbanColumnRequest dto, @MappingTarget KanbanColumn entity);
+    void updateEntityFromDto(KanbanColumnRenameRequest dto, @MappingTarget KanbanColumn entity);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    void updateEntityFromDto(KanbanTaskRequest dto, @MappingTarget KanbanTask entity);
+    void updateEntityFromDto(KanbanTaskUpdateRequest dto, @MappingTarget KanbanTask entity);
 }
