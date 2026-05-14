@@ -1,6 +1,6 @@
 package com.atlasys.freeplanning.planning.dto;
 
-public record Note(
+public record AnnotationDTO(
         String content
 ) {
 }
