@@ -1,8 +1,8 @@
 package com.atlasys.freeplanning.planning.service;
 
 import com.atlasys.freeplanning.identity.model.User;
-import com.atlasys.freeplanning.planning.dto.Note;
-import com.atlasys.freeplanning.planning.dto.kanban.BoardResponse;
+import com.atlasys.freeplanning.planning.dto.AnnotationDTO;
+import com.atlasys.freeplanning.planning.dto.kanban.*;
 import com.atlasys.freeplanning.planning.dto.project.*;
 import com.atlasys.freeplanning.planning.mapper.KanbanMapper;
 import com.atlasys.freeplanning.planning.mapper.ProjectMapper;
@@ -60,13 +60,6 @@ public class ProjectService {
         return new ProjectDetailResponse(project);
     }
 
-    @Transactional(readOnly = true)
-    public BoardResponse findProjectBoard(User loggedUser, UUID projectId) {
-        Project project = findProject(loggedUser, projectId);
-        List<KanbanColumn> columns = columnRepository.findAllByProject(project);
-        return kanbanMapper.toResponse(columns);
-    }
-
     @Transactional
     public ProjectDetailResponse create(User loggedUser, ProjectCreateRequest request) {
         Client client = clientRepository.findById(request.clientId())
@@ -89,9 +82,16 @@ public class ProjectService {
         project.setClosedValue(request.closedValue());
         project.setDeliveryForecast(request.deliveryForecast());
         project.setDeliveryDate(request.deliveryDate());
+        project.setIsPersonalProject(request.isPersonalProject());
         project.setResponsible(loggedUser);
         project.setClient(client);
         repository.save(project);
+
+        KanbanColumn backlogColumn = new KanbanColumn("A fazer", 1, project);
+        KanbanColumn inProgressColumn = new KanbanColumn("Em andamento", 2, project);
+        KanbanColumn reviewColumn = new KanbanColumn("Em revisão", 3, project);
+        KanbanColumn doneColumn = new KanbanColumn("Concluído", 4, project);
+        columnRepository.saveAll(List.of(backlogColumn, inProgressColumn, reviewColumn, doneColumn));
 
         return new ProjectDetailResponse(project);
     }
@@ -113,11 +113,57 @@ public class ProjectService {
     }
 
     @Transactional
-    public Note updateNotes(User loggedUser, UUID id, Note annotation) {
+    public AnnotationDTO updateNotes(User loggedUser, UUID id, AnnotationDTO annotation) {
         Project project = findProject(loggedUser, id);
-        project.setAnnotation(annotation);
+        project.setAnnotation(annotation.content());
         repository.save(project);
         return annotation;
+    }
+
+    @Transactional(readOnly = true)
+    public BoardResponse findBoard(User loggedUser, UUID projectId) {
+        Project project = findProject(loggedUser, projectId);
+        List<KanbanColumn> columns = columnRepository.findAllByProjectOrderedByPosition(project);
+        return kanbanMapper.toResponse(columns);
+    }
+
+    @Transactional
+    public KanbanColumnResponse addColumn(User loggedUser, UUID id, KanbanColumnCreateRequest request) {
+        Project project = findProject(loggedUser, id);
+        KanbanColumn column = new KanbanColumn();
+        column.setName(request.name());
+        column.setPosition(request.position());
+        column.setProject(project);
+        return new KanbanColumnResponse(columnRepository.save(column));
+    }
+
+    @Transactional
+    public KanbanColumnResponse moveColumn(User loggedUser, UUID id, UUID columnId, KanbanColumnReorderRequest request) {
+        Project project = findProject(loggedUser, id);
+        KanbanColumn targetColumn = columnRepository.findByIdAndUser(columnId, loggedUser)
+                .orElseThrow(() -> new EntityNotFoundException("Column not found"));
+        int oldPos = targetColumn.getPosition();
+        int newPos = request.position();
+        if (oldPos == newPos)
+            return new KanbanColumnResponse(targetColumn);
+        List<KanbanColumn> affectedColumns = columnRepository.findAffectedColumns(project, Math.min(oldPos, newPos), Math.max(oldPos, newPos));
+        for (KanbanColumn col : affectedColumns) {
+            if (oldPos < newPos) {
+                col.setPosition(col.getPosition() - 1);
+            } else {
+                col.setPosition(col.getPosition() + 1);
+            }
+        }
+        targetColumn.setPosition(newPos);
+        affectedColumns.add(targetColumn);
+        columnRepository.saveAll(affectedColumns);
+        return new KanbanColumnResponse(targetColumn);
+    }
+
+    public ProjectSummaryResponse changeStatus(User loggedUser, UUID id, ProjectChangeStatusRequest status) {
+        Project project = findProject(loggedUser, id);
+        project.setStatus(status.status());
+        return new ProjectSummaryResponse(repository.save(project));
     }
 
     private Project findProject(User loggedUser, UUID id) {

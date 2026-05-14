@@ -1,11 +1,13 @@
 package com.atlasys.freeplanning.planning.controller;
 
 import com.atlasys.freeplanning.identity.model.User;
-import com.atlasys.freeplanning.planning.dto.Note;
-import com.atlasys.freeplanning.planning.dto.kanban.BoardResponse;
+import com.atlasys.freeplanning.planning.dto.AnnotationDTO;
+import com.atlasys.freeplanning.planning.dto.kanban.*;
 import com.atlasys.freeplanning.planning.dto.project.*;
+import com.atlasys.freeplanning.planning.model.Project;
 import com.atlasys.freeplanning.planning.service.ProjectService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -20,13 +22,10 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/projects")
+@RequiredArgsConstructor
 public class ProjectController {
 
     private final ProjectService service;
-
-    public ProjectController(ProjectService service) {
-        this.service = service;
-    }
 
     @GetMapping
     public ResponseEntity<Page<ProjectSummaryResponse>> findAll(
@@ -45,14 +44,6 @@ public class ProjectController {
     ) {
         ProjectDetailResponse response = service.findOne(loggedUser, id);
         return ResponseEntity.ok().body(response);
-    }
-
-    @GetMapping("/{id}/board")
-    public ResponseEntity<BoardResponse> findBoard(
-            @AuthenticationPrincipal User loggedUser,
-            @PathVariable UUID id
-    ) {
-        return ResponseEntity.ok(service.findProjectBoard(loggedUser, id));
     }
 
     @PostMapping
@@ -79,11 +70,47 @@ public class ProjectController {
     }
 
     @PutMapping("/{id}/notes")
-    public ResponseEntity<Note> updateNote(
+    public ResponseEntity<AnnotationDTO> updateNote(
             @AuthenticationPrincipal User loggedUser,
-            @RequestBody @Valid Note annotation,
+            @RequestBody @Valid AnnotationDTO annotation,
             @PathVariable UUID id
     ) {
         return ResponseEntity.ok(service.updateNotes(loggedUser, id, annotation));
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<ProjectSummaryResponse> changeStatus(
+            @AuthenticationPrincipal User loggedUser,
+            @PathVariable UUID id,
+            @RequestBody ProjectChangeStatusRequest request
+    ) {
+        return ResponseEntity.ok(service.changeStatus(loggedUser, id, request));
+    }
+
+    @GetMapping("/{id}/columns")
+    public ResponseEntity<BoardResponse> findBoard(
+            @AuthenticationPrincipal User loggedUser,
+            @PathVariable UUID id
+    ) {
+        return ResponseEntity.ok(service.findBoard(loggedUser, id));
+    }
+
+    @PostMapping("/{id}/columns")
+    public ResponseEntity<KanbanColumnResponse> addColumn(
+            @AuthenticationPrincipal User loggedUser,
+            @PathVariable UUID id,
+            @RequestBody KanbanColumnCreateRequest column
+    ) {
+        return ResponseEntity.ok(service.addColumn(loggedUser, id, column));
+    }
+
+    @PatchMapping("/{id}/columns/{columnId}/move")
+    public ResponseEntity<KanbanColumnResponse> moveColumn(
+            @AuthenticationPrincipal User loggedUser,
+            @PathVariable UUID id,
+            @PathVariable UUID columnId,
+            @RequestBody KanbanColumnReorderRequest position
+    ) {
+        return ResponseEntity.ok(service.moveColumn(loggedUser, id, columnId, position));
     }
 }
