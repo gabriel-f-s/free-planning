@@ -17,6 +17,7 @@ public record ProjectCreateRequest(
         BigDecimal closedValue,
         LocalDate deliveryForecast,
         LocalDate deliveryDate,
+        Boolean isPersonalProject,
         UUID clientId
 ) {
 }

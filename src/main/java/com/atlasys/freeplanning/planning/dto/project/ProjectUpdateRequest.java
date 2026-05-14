@@ -1,6 +1,5 @@
 package com.atlasys.freeplanning.planning.dto.project;
 
-import com.atlasys.freeplanning.planning.dto.Note;
 import com.atlasys.freeplanning.planning.model.enums.Platform;
 import com.atlasys.freeplanning.planning.model.enums.ProjectType;
 import com.atlasys.freeplanning.planning.model.enums.Status;
@@ -20,7 +19,8 @@ public record ProjectUpdateRequest(
         BigDecimal closedValue,
         LocalDate deliveryForecast,
         LocalDate deliveryDate,
-        Note annotation,
+        Boolean isPersonalProject,
+        String annotation,
         UUID clientId
 ) {
 }

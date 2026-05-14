@@ -1,7 +1,5 @@
 package com.atlasys.freeplanning.planning.dto.project;
 
-import com.atlasys.freeplanning.planning.dto.Note;
-import com.atlasys.freeplanning.planning.dto.client.ClientDetailWithProjectsResponse;
 import com.atlasys.freeplanning.planning.dto.client.ClientDetailWithoutProjectsResponse;
 import com.atlasys.freeplanning.planning.model.Project;
 import com.atlasys.freeplanning.planning.model.enums.Platform;
@@ -24,7 +22,8 @@ public record ProjectDetailResponse(
         BigDecimal closedValue,
         LocalDate deliveryForecast,
         LocalDate deliveryDate,
-        Note annotation,
+        String annotation,
+        Boolean isPersonalProject,
         ClientDetailWithoutProjectsResponse client
 ) {
     public ProjectDetailResponse(Project project) {
@@ -41,6 +40,7 @@ public record ProjectDetailResponse(
                 project.getDeliveryForecast(),
                 project.getDeliveryDate(),
                 project.getAnnotation(),
+                project.getIsPersonalProject(),
                 new ClientDetailWithoutProjectsResponse(project.getClient())
         );
     }
