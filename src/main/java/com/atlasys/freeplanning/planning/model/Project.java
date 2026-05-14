@@ -1,15 +1,12 @@
 package com.atlasys.freeplanning.planning.model;
 
 import com.atlasys.freeplanning.identity.model.User;
-import com.atlasys.freeplanning.planning.dto.Note;
 import com.atlasys.freeplanning.planning.model.enums.Platform;
 import com.atlasys.freeplanning.planning.model.enums.ProjectType;
 import com.atlasys.freeplanning.planning.model.enums.Status;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -52,9 +49,10 @@ public class Project {
     @Column(name = "delivery_date")
     private LocalDate deliveryDate;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(columnDefinition = "jsonb")
-    private Note annotation;
+    @Column(columnDefinition = "TEXT")
+    private String annotation;
+
+    private Boolean isPersonalProject;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_fk", nullable = false)
