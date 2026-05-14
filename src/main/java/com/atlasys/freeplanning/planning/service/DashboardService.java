@@ -2,7 +2,7 @@ package com.atlasys.freeplanning.planning.service;
 
 import com.atlasys.freeplanning.identity.model.User;
 import com.atlasys.freeplanning.identity.repository.UserRepository;
-import com.atlasys.freeplanning.planning.dto.Note;
+import com.atlasys.freeplanning.planning.dto.AnnotationDTO;
 import com.atlasys.freeplanning.planning.dto.dashboard.DashboardPipelineResponse;
 import com.atlasys.freeplanning.planning.dto.dashboard.DashboardSummaryResponse;
 import com.atlasys.freeplanning.planning.dto.project.ProjectPipelineResponse;
@@ -64,13 +64,14 @@ public class DashboardService {
         );
     }
 
-    public Note findAnnotation(User loggedUser) {
-        return loggedUser.getAnnotation();
+    public AnnotationDTO findAnnotation(User loggedUser) {
+        return new AnnotationDTO(loggedUser.getAnnotation());
     }
 
-    public void updateAnnotation(User loggedUser, Note annotation) {
-        loggedUser.setAnnotation(annotation);
+    public AnnotationDTO updateAnnotation(User loggedUser, AnnotationDTO annotation) {
+        loggedUser.setAnnotation(annotation.content());
         userRepository.save(loggedUser);
+        return new AnnotationDTO(loggedUser.getAnnotation());
     }
 
     public BigDecimal findUserHourlyRate(User loggedUser) {

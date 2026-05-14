@@ -1,7 +1,7 @@
 package com.atlasys.freeplanning.planning.controller;
 
 import com.atlasys.freeplanning.identity.model.User;
-import com.atlasys.freeplanning.planning.dto.Note;
+import com.atlasys.freeplanning.planning.dto.AnnotationDTO;
 import com.atlasys.freeplanning.planning.dto.dashboard.DashboardPipelineResponse;
 import com.atlasys.freeplanning.planning.dto.dashboard.DashboardSummaryResponse;
 import com.atlasys.freeplanning.planning.service.DashboardService;
@@ -36,19 +36,18 @@ public class DashboardController {
     }
 
     @GetMapping("/notes")
-    public ResponseEntity<Note> findAnnotation(
+    public ResponseEntity<AnnotationDTO> findAnnotation(
             @AuthenticationPrincipal User loggedUser
     ) {
         return ResponseEntity.ok(service.findAnnotation(loggedUser));
     }
 
     @PutMapping(value = "/notes")
-    public ResponseEntity<Void> updateAnnotation(
+    public ResponseEntity<AnnotationDTO> updateAnnotation(
             @AuthenticationPrincipal User loggedUser,
-            @RequestBody Note annotation
+            @RequestBody AnnotationDTO annotation
     ) {
-        service.updateAnnotation(loggedUser, annotation);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(service.updateAnnotation(loggedUser, annotation));
     }
 
     @GetMapping("/hourly-rate")
