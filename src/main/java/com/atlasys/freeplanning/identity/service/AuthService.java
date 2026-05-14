@@ -53,6 +53,7 @@ public class AuthService {
         newUser.setEmail(request.email());
         newUser.setPassword(encryptedPassword);
         newUser.setOccupation(request.occupation());
+        newUser.setHourlyRate(request.hourlyRate());
         this.userRepository.save(newUser);
 
         String token = tokenService.generateToken(newUser);
