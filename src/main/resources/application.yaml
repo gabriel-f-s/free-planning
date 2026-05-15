@@ -1,3 +1,7 @@
 spring:
   application:
     name: freeplanning
+
+  security:
+    token:
+      secret: ${RSA_PRIVATE_KEY}
