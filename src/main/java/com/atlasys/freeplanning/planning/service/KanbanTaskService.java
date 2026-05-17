@@ -13,6 +13,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,24 +32,47 @@ public class KanbanTaskService {
 
     @Transactional
     public KanbanTaskResponse moveTask(User loggedUser, UUID taskId, KanbanTaskReorderRequest request) {
-        KanbanColumn column = findColumn(loggedUser, request.columnId());
+        KanbanColumn newColumn = findColumn(loggedUser, request.columnId());
         KanbanTask targetTask = findTask(loggedUser, taskId);
+        KanbanColumn oldColumn = targetTask.getColumn();
+
         int oldPos = targetTask.getPosition();
         int newPos = request.position();
-        if (oldPos == newPos)
-            return new KanbanTaskResponse(targetTask);
-        List<KanbanTask> affectedTasks = repository.findAffectedTasks(column, Math.min(oldPos, newPos), Math.max(oldPos, newPos));
-        for (KanbanTask task : affectedTasks) {
-            if (oldPos < newPos) {
+
+        boolean isSameColumn = oldColumn.getId().equals(newColumn.getId());
+
+        if (isSameColumn && oldPos == newPos) return new KanbanTaskResponse(targetTask);
+
+        List<KanbanTask> tasksToSave = new ArrayList<>();
+        if (isSameColumn) {
+            int min = Math.min(oldPos, newPos);
+            int max = Math.max(oldPos, newPos);
+            List<KanbanTask> affectedTasks = repository.findByColumnAndPositionBetween(newColumn, min, max);
+            for (KanbanTask task : affectedTasks) {
+                if (task.getId().equals(targetTask.getId())) continue;
+                if (oldPos < newPos) {
+                    task.setPosition(task.getPosition() - 1);
+                } else {
+                    task.setPosition(task.getPosition() + 1);
+                }
+                tasksToSave.add(task);
+            }
+        } else {
+            List<KanbanTask> oldColumnTasks = repository.findByColumnAndPositionGreaterThan(oldColumn, oldPos);
+            for (KanbanTask task : oldColumnTasks) {
                 task.setPosition(task.getPosition() - 1);
-            } else {
+                tasksToSave.add(task);
+            }
+            List<KanbanTask> newColumnTasks = repository.findByColumnAndPositionGreaterThanEqual(newColumn, newPos);
+            for (KanbanTask task : newColumnTasks) {
                 task.setPosition(task.getPosition() + 1);
+                tasksToSave.add(task);
             }
         }
         targetTask.setPosition(newPos);
-        targetTask.setColumn(column);
-        affectedTasks.add(targetTask);
-        repository.saveAll(affectedTasks);
+        targetTask.setColumn(newColumn);
+        tasksToSave.add(targetTask);
+        repository.saveAll(tasksToSave);
         return new KanbanTaskResponse(targetTask);
     }
 
