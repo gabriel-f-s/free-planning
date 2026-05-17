@@ -62,8 +62,17 @@ public class ProjectService {
 
     @Transactional
     public ProjectDetailResponse create(User loggedUser, ProjectCreateRequest request) {
-        Client client = clientRepository.findById(request.clientId())
-                .orElseThrow(() -> new EntityNotFoundException("Client not found"));
+        Project project = new Project();
+
+        if (!request.isPersonalProject()) {
+            Client client = clientRepository.findById(request.clientId())
+                    .orElseThrow(() -> new EntityNotFoundException("Client not found"));
+            project.setClient(client);
+            project.setMinimumValue(request.minimumValue());
+            project.setMaximumValue(request.maximumValue());
+            project.setClosedValue(request.closedValue());
+            project.setPlatform(request.platform());
+        }
 
         if (request.deliveryForecast() != null && request.deliveryForecast().isBefore(LocalDate.now()))
             throw new IllegalArgumentException("Delivery forecast must be in the future");
@@ -71,20 +80,18 @@ public class ProjectService {
         if (request.deliveryDate() != null && request.deliveryDate().isBefore(LocalDate.now()))
             throw new IllegalArgumentException("Delivery date must be in the future");
 
-        Project project = new Project();
         project.setTitle(request.title());
         project.setDescription(request.description());
-        project.setPlatform(request.platform());
-        project.setStatus(Status.UNDER_NEGOTIATION);
+        if (request.isPersonalProject()) {
+            project.setStatus(Status.IN_PROGRESS);
+        } else {
+            project.setStatus(Status.UNDER_NEGOTIATION);
+        }
         project.setType(request.type());
-        project.setMinimumValue(request.minimumValue());
-        project.setMaximumValue(request.maximumValue());
-        project.setClosedValue(request.closedValue());
         project.setDeliveryForecast(request.deliveryForecast());
         project.setDeliveryDate(request.deliveryDate());
         project.setIsPersonalProject(request.isPersonalProject());
         project.setResponsible(loggedUser);
-        project.setClient(client);
         repository.save(project);
 
         KanbanColumn backlogColumn = new KanbanColumn("A fazer", 1, project);
@@ -93,7 +100,7 @@ public class ProjectService {
         KanbanColumn doneColumn = new KanbanColumn("Concluído", 4, project);
         columnRepository.saveAll(List.of(backlogColumn, inProgressColumn, reviewColumn, doneColumn));
 
-        return new ProjectDetailResponse(project);
+        return mapper.toDetailResponse(project);
     }
 
     @Transactional
@@ -163,7 +170,7 @@ public class ProjectService {
     public ProjectSummaryResponse changeStatus(User loggedUser, UUID id, ProjectChangeStatusRequest status) {
         Project project = findProject(loggedUser, id);
         project.setStatus(status.status());
-        return new ProjectSummaryResponse(repository.save(project));
+        return mapper.toSummaryResponse(repository.save(project));
     }
 
     private Project findProject(User loggedUser, UUID id) {

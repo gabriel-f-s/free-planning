@@ -11,21 +11,17 @@ import java.util.UUID;
 public record ProjectPipelineResponse(
         UUID id,
         String title,
-        Platform platform,
-        ProjectType type,
         BigDecimal closedValue,
         LocalDate deliveryDate,
-        String client
+        Boolean isPersonalProject
 ) {
     public ProjectPipelineResponse(Project project) {
         this(
                 project.getId(),
                 project.getTitle(),
-                project.getPlatform(),
-                project.getType(),
                 project.getClosedValue(),
                 project.getDeliveryDate(),
-                project.getClient().getName()
+                project.getIsPersonalProject()
         );
     }
 }

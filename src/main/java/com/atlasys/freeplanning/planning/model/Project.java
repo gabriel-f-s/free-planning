@@ -59,6 +59,6 @@ public class Project {
     private User responsible;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "client_fk", nullable = false)
+    @JoinColumn(name = "client_fk", nullable = true)
     private Client client;
 }

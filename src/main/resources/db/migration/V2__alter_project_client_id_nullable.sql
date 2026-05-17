@@ -1,0 +1,1 @@
+ALTER TABLE planning.projects ALTER COLUMN client_fk DROP NOT NULL;

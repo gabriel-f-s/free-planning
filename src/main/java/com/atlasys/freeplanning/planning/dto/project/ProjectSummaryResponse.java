@@ -4,6 +4,7 @@ import com.atlasys.freeplanning.planning.model.Project;
 import com.atlasys.freeplanning.planning.model.enums.Platform;
 import com.atlasys.freeplanning.planning.model.enums.ProjectType;
 import com.atlasys.freeplanning.planning.model.enums.Status;
+import jakarta.annotation.Nullable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -18,7 +19,8 @@ public record ProjectSummaryResponse(
         ProjectType type,
         BigDecimal closedValue,
         LocalDate deliveryForecast,
-        String client
+        Boolean isPersonalProject,
+        @Nullable String client
 ) {
     public ProjectSummaryResponse(Project project) {
         this(
@@ -30,7 +32,7 @@ public record ProjectSummaryResponse(
                 project.getType(),
                 project.getClosedValue(),
                 project.getDeliveryForecast(),
-                project.getClient().getName()
-        );
+                project.getIsPersonalProject(),
+                project.getClient() != null ? project.getClient().getName() : null);
     }
 }
